@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Simulador SAEB → IDEB</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #0a2f6c 0%, #041a3a 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #212121;
+        }
+
+        :root {
+            --azul-escuro: #0a2f6c;
+            --azul-claro: #eef3fb;
+            --vermelho: #d32f2f;
+            --branco: #ffffff;
+            --preto: #212121;
+            --cinza-borda: #e0e4e9;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #0f1a24;
+            border-radius: 48px;
+            padding: 20px;
+            box-shadow: 0 30px 35px rgba(0,0,0,0.5), inset 0 1px 4px rgba(255,255,200,0.1);
+            border: 1px solid var(--vermelho);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0a2f6ccc;
+            backdrop-filter: blur(4px);
+            padding: 12px 24px;
+            border-radius: 60px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-area img {
+            max-height: 50px;
+            width: auto;
+            background: white;
+            border-radius: 12px;
+            padding: 4px;
+        }
+
+        .logo-area span {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ffec9e;
+        }
+
+        .title-badge {
+            background: var(--vermelho);
+            color: white;
+            padding: 6px 18px;
+            border-radius: 3rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--branco);
+            border-left: 6px solid var(--vermelho);
+            padding-left: 1rem;
+            margin: 1rem 0 1.2rem 0;
+        }
+
+        .card {
+            background: var(--branco);
+            border-radius: 32px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            border: 1px solid var(--cinza-borda);
+        }
+
+        .info-box {
+            background: var(--azul-claro);
+            border-left: 5px solid var(--vermelho);
+            padding: 1rem;
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-box p {
+            color: var(--preto);
+            line-height: 1.4;
+        }
+
+        .input-group {
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: var(--azul-escuro);
+            margin-bottom: 0.3rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 40px;
+            border: 1px solid var(--cinza-borda);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .row-2cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #0a2f6c, #1e4663);
+            border-radius: 32px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ffec9e;
+            margin: 0.3rem 0;
+            letter-spacing: 1px;
+        }
+
+        .result-label {
+            color: white;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #0a2f6c, #052050);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 60px;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.1s linear;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
+
+        button:active {
+            transform: translateY(2px);
+        }
+
+        .info-extra {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 0.8rem;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+        }
+
+        .param-table {
+            font-size: 0.75rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            padding: 0.8rem;
+            margin-top: 0.8rem;
+            text-align: left;
+        }
+
+        .param-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .param-table th, .param-table td {
+            padding: 4px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .param-table th {
+            color: #ffec9e;
+        }
+
+        .links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 16px;
+            border-radius: 40px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .link-btn:hover {
+            background: var(--vermelho);
+            transform: translateY(-2px);
+        }
+
+        .school-select {
+            margin-bottom: 1rem;
+        }
+
+        .pdf-btn {
+            background: linear-gradient(135deg, #27ae60, #1e8449);
+            margin-top: 0;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1rem;
+            color: #b4c8e0;
+            font-size: 0.8rem;
+            border-top: 1px solid #2c4c6e;
+        }
+
+        @media (max-width: 700px) {
+            .container { padding: 12px; }
+            .row-2cols { grid-template-columns: 1fr; gap: 1rem; }
+            h2 { font-size: 1.4rem; }
+            .result-value { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo-area">
+            <img src="https://i.ibb.co/0p01LzxB/logo3de.jpg" alt="Logo SEDUC">
+            <span>Simulador SAEB → IDEB</span>
+        </div>
+        <div class="title-badge">📊 Conversão simulada (Nota Técnica)</div>
+    </div>
+
+    <h2>🎯 SAEB e IDEB: entenda a relação</h2>
+    <div class="info-box">
+        <p><strong>🔢 SAEB</strong> mede o que os alunos aprenderam (proficiência em Língua Portuguesa e Matemática).<br>
+        <strong>📈 IDEB</strong> combina essa medição com o fluxo escolar (taxa de aprovação) para gerar um índice de qualidade.</p>
+        <p><strong>Fórmula do IDEB:</strong> <code>IDEB = (média padronizada SAEB) × (taxa de aprovação)</code></p>
+        <p><strong>Componente de Aprendizado (0–10):</strong> média aritmética das proficiências convertidas (LP + Mat) / 2.<br>
+        <strong>Componente de Fluxo (0–1):</strong> taxa de aprovação (ex: 92% = 0,92).</p>
+        <p><strong>Exemplo prático:</strong> LP=6,0; Mat=7,0 → Média=6,5; Aprovação=92% → IDEB = 6,5 × 0,92 = 5,98.</p>
+    </div>
+
+    <div class="card">
+        <h2 style="color: var(--azul-escuro); border-left-color: var(--vermelho); margin-top: 0;">📝 Dados da escola e notas SAEB</h2>
+        
+        <div class="school-select">
+            <label><i class="fas fa-school"></i> Selecione a escola (para o boletim)</label>
+            <select id="escolaSelect">
+                <option value="E.E. ALADINO POLON">E.E. ALADINO POLON</option>
+                <option value="E.E. ALBERTO GRAF – CAPITÃO">E.E. ALBERTO GRAF – CAPITÃO</option>
+                <option value="E.E. BAIRRO DO ITAIM">E.E. BAIRRO DO ITAIM</option>
+                <option value="E.E. MARIO TOLEDO DE MORAES">E.E. MARIO TOLEDO DE MORAES</option>
+                <option value="E.E. NELSON MANZANARES">E.E. NELSON MANZANARES</option>
+                <option value="E.E. OLINDO DÁRTORA">E.E. OLINDO DÁRTORA</option>
+            </select>
+        </div>
+
+        <div class="row-2cols">
+            <div class="input-group">
+                <label><i class="fas fa-book-open"></i> Língua Portuguesa (proficiência SAEB)</label>
+                <input type="number" id="notaLP" min="0" max="500" step="1" value="250" placeholder="Ex: 250">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-calculator"></i> Matemática (proficiência SAEB)</label>
+                <input type="number" id="notaMat" min="0" max="500" step="1" value="250" placeholder="Ex: 250">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label><i class="fas fa-graduation-cap"></i> Etapa de ensino (série avaliada)</label>
+            <select id="etapa">
+                <option value="5ano">5º ano do EF (antiga 4ª série)</option>
+                <option value="9ano" selected>9º ano do EF (antiga 8ª série)</option>
+                <option value="3em">3ª série do Ensino Médio</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label><i class="fas fa-chart-line"></i> Taxa de aprovação (%) para cálculo do IDEB</label>
+            <input type="number" id="taxaAprovacao" min="0" max="100" step="0.1" value="92" placeholder="Ex: 92">
+        </div>
+
+        <button id="calcularBtn"><i class="fas fa-chart-line"></i> Calcular IDEB e conversão</button>
+    </div>
+
+    <div class="result-card" id="resultados">
+        <div class="result-label">📖 Língua Portuguesa (escala 0–10)</div>
+        <div class="result-value" id="resultadoLP">—</div>
+        <div class="result-label" style="margin-top: 1rem;">🧮 Matemática (escala 0–10)</div>
+        <div class="result-value" id="resultadoMat">—</div>
+        <div class="result-label" style="margin-top: 1rem;">⭐ Média SAEB (aprendizado)</div>
+        <div class="result-value" id="resultadoMedia">—</div>
+        <div class="result-label" style="margin-top: 1rem;">🎯 IDEB simulado</div>
+        <div class="result-value" id="resultadoIdeb">—</div>
+        <div class="info-extra" id="infoExtra">
+            <i class="fas fa-info-circle"></i> Parâmetros da Nota Técnica (Saeb 1997):
+            <div class="param-table" id="paramTable"></div>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+        <button id="gerarPDFBtn" class="pdf-btn"><i class="fas fa-file-pdf"></i> 📄 Gerar Boletim PDF</button>
+    </div>
+
+    <div class="links">
+        <a href="https://download.inep.gov.br/educacao_basica/portal_ideb/o_que_e_o_ideb/Nota_Tecnica_n1_concepcaoIDEB.pdf" target="_blank" class="link-btn" rel="noopener noreferrer"><i class="fas fa-file-alt"></i> Nota Técnica Ideb</a>
+        <a href="https://pne-de-cai.github.io/escolascodinep/" target="_blank" class="link-btn" rel="noopener noreferrer"><i class="fas fa-chart-simple"></i> QEdu-link direto das escolas.</a>
+        <a href="https://saeb.inep.gov.br/saeb/" target="_blank" class="link-btn" rel="noopener noreferrer"><i class="fas fa-university"></i> INEP > SAEB 2025</a>
+    </div>
+
+    <footer>
+URE-CAIEIRAS 2025 - SIMULADOR 
+    </footer>
+</div>
+
+<!-- Área oculta para o PDF (boletim) -->
+<div id="boletimPDF" style="display: none; padding: 20px; background: white; font-family: 'Inter', sans-serif; max-width: 800px; margin: 0 auto;">
+    <div style="text-align: center; border-bottom: 2px solid #0a2f6c; padding-bottom: 10px; margin-bottom: 20px;">
+        <img src="https://i.ibb.co/0p01LzxB/logo3de.jpg" alt="Logo SEDUC" style="max-height: 60px; background: white; border-radius: 12px; padding: 4px; margin-bottom: 10px;">
+        <h1 style="color: #0a2f6c; font-size: 24px; margin: 0;">Boletim de Resultados</h1>
+        <p style="color: #d32f2f; font-weight: 600;">SAEB → IDEB · Conversão oficial</p>
+    </div>
+    <div id="boletimConteudo"></div>
+    <div style="margin-top: 30px; text-align: center; font-size: 10px; color: #666; border-top: 1px solid #ddd; padding-top: 10px;">
+        Documento gerado pelo Simulador SAEB/IDEB · Dados baseados na Nota Técnica do INEP.
+    </div>
+</div>
+
+<script>
+    (function() {
+        // Parâmetros oficiais da Nota Técnica do Ideb (Saeb 1997)
+        const parametros = {
+            '5ano': {
+                lp: { inf: 0, sup: 324 },
+                mat: { inf: 60, sup: 324 }
+            },
+            '9ano': {
+                lp: { inf: 100, sup: 400 },
+                mat: { inf: 100, sup: 400 }
+            },
+            '3em': {
+                lp: { inf: 117, sup: 451 },
+                mat: { inf: 111, sup: 467 }
+            }
+        };
+
+        const nomesEtapa = {
+            '5ano': '5º ano do Ensino Fundamental (antiga 4ª série)',
+            '9ano': '9º ano do Ensino Fundamental (antiga 8ª série)',
+            '3em': '3ª série do Ensino Médio'
+        };
+
+        const notaLPInput = document.getElementById('notaLP');
+        const notaMatInput = document.getElementById('notaMat');
+        const etapaSelect = document.getElementById('etapa');
+        const taxaAprovacaoInput = document.getElementById('taxaAprovacao');
+        const resultadoLPSpan = document.getElementById('resultadoLP');
+        const resultadoMatSpan = document.getElementById('resultadoMat');
+        const resultadoMediaSpan = document.getElementById('resultadoMedia');
+        const resultadoIdebSpan = document.getElementById('resultadoIdeb');
+        const paramTableDiv = document.getElementById('paramTable');
+        const escolaSelect = document.getElementById('escolaSelect');
+        const calcularBtn = document.getElementById('calcularBtn');
+        const gerarPDFBtn = document.getElementById('gerarPDFBtn');
+
+        let ultimoCalculo = {
+            lp: 0,
+            mat: 0,
+            media: 0,
+            ideb: 0,
+            lpRaw: 0,
+            matRaw: 0,
+            aprovacao: 0,
+            etapa: '9ano',
+            etapaNome: '',
+            escola: ''
+        };
+
+        function atualizarParametros() {
+            const etapa = etapaSelect.value;
+            const params = parametros[etapa];
+            if (!params) return;
+            
+            paramTableDiv.innerHTML = `
+                <table>
+                    <thead>
+                        <tr><th>Disciplina</th><th>S<sub>inf</sub></th><th>S<sub>sup</sub></th><th>Amplitude</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>📖 Língua Portuguesa</td><td>${params.lp.inf}</td><td>${params.lp.sup}</td><td>${params.lp.sup - params.lp.inf}</td></tr>
+                        <tr><td>🧮 Matemática</td><td>${params.mat.inf}</td><td>${params.mat.sup}</td><td>${params.mat.sup - params.mat.inf}</td></tr>
+                    </tbody>
+                </table>
+                <div style="margin-top: 6px; font-size: 0.7rem;">Etapa: ${nomesEtapa[etapa]}</div>
+            `;
+        }
+
+        function converterNota(nota, inf, sup) {
+            let notaNum = parseFloat(nota);
+            if (isNaN(notaNum)) notaNum = 0;
+            if (notaNum <= inf) return 0;
+            if (notaNum >= sup) return 10;
+            return ((notaNum - inf) / (sup - inf)) * 10;
+        }
+
+        function formatarValor(valor) {
+            return valor.toFixed(3);
+        }
+
+        function calcularTudo() {
+            const etapa = etapaSelect.value;
+            const params = parametros[etapa];
+            if (!params) return;
+
+            const notaLP = notaLPInput.value;
+            const notaMat = notaMatInput.value;
+            const taxaAprovacao = parseFloat(taxaAprovacaoInput.value) / 100;
+
+            const nLP = converterNota(notaLP, params.lp.inf, params.lp.sup);
+            const nMat = converterNota(notaMat, params.mat.inf, params.mat.sup);
+            const media = (nLP + nMat) / 2;
+            const ideb = media * taxaAprovacao;
+
+            resultadoLPSpan.innerText = formatarValor(nLP);
+            resultadoMatSpan.innerText = formatarValor(nMat);
+            resultadoMediaSpan.innerText = formatarValor(media);
+            resultadoIdebSpan.innerText = formatarValor(ideb);
+
+            ultimoCalculo = {
+                lp: nLP,
+                mat: nMat,
+                media: media,
+                ideb: ideb,
+                lpRaw: parseFloat(notaLP),
+                matRaw: parseFloat(notaMat),
+                aprovacao: parseFloat(taxaAprovacaoInput.value),
+                etapa: etapa,
+                etapaNome: nomesEtapa[etapa],
+                escola: escolaSelect.value,
+                params: params
+            };
+        }
+
+        function atualizarTudo() {
+            atualizarParametros();
+            calcularTudo();
+        }
+
+        // Gerar PDF do boletim
+        function gerarBoletimPDF() {
+            calcularTudo(); // garantir dados atualizados
+            const escolaNome = escolaSelect.value;
+            const dataAtual = new Date().toLocaleDateString('pt-BR');
+            const etapaNome = nomesEtapa[ultimoCalculo.etapa];
+            const params = ultimoCalculo.params;
+
+            const conteudo = `
+                <div style="margin-bottom: 20px;">
+                    <p><strong>Escola:</strong> ${escolaNome}</p>
+                    <p><strong>Data de emissão:</strong> ${dataAtual}</p>
+                    <p><strong>Etapa de ensino:</strong> ${etapaNome}</p>
+                    <p><strong>Parâmetros de conversão (Saeb 1997):</strong> LP (${params.lp.inf}–${params.lp.sup}), Mat (${params.mat.inf}–${params.mat.sup})</p>
+                </div>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                    <thead>
+                        <tr><th style="background: #0a2f6c; color: white; padding: 8px; text-align: left;">Indicador</th>
+                        <th style="background: #0a2f6c; color: white; padding: 8px; text-align: center;">Valor SAEB (bruto)</th>
+                        <th style="background: #0a2f6c; color: white; padding: 8px; text-align: center;">Escala 0–10</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px;"><strong>Língua Portuguesa</strong></td>
+                            <td style="padding: 8px; text-align: center;">${ultimoCalculo.lpRaw.toFixed(1)}</td>
+                            <td style="padding: 8px; text-align: center; font-weight: bold; color: #0a2f6c;">${formatarValor(ultimoCalculo.lp)}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px;"><strong>Matemática</strong></td>
+                            <td style="padding: 8px; text-align: center;">${ultimoCalculo.matRaw.toFixed(1)}</td>
+                            <td style="padding: 8px; text-align: center; font-weight: bold; color: #0a2f6c;">${formatarValor(ultimoCalculo.mat)}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px;"><strong>Média SAEB (aprendizado)</strong></td>
+                            <td style="padding: 8px; text-align: center;">—</td>
+                            <td style="padding: 8px; text-align: center; font-weight: bold; color: #d32f2f;">${formatarValor(ultimoCalculo.media)}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px;"><strong>Taxa de aprovação</strong></td>
+                            <td colspan="2" style="padding: 8px; text-align: center;">${ultimoCalculo.aprovacao.toFixed(1)}%</td>
+                        </tr>
+                        <tr style="background: #f5f5f5;">
+                            <td style="padding: 8px;"><strong>🎯 IDEB simulado</strong></td>
+                            <td colspan="2" style="padding: 8px; text-align: center; font-size: 1.4rem; font-weight: 800; color: #0a2f6c;">${formatarValor(ultimoCalculo.ideb)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="background: #eef3fb; padding: 12px; border-radius: 16px; margin-top: 15px;">
+                    <p><strong>📌 Interpretação:</strong> O IDEB combina aprendizado (média SAEB 0–10) e fluxo (taxa de aprovação).<br>
+                    Fórmula: <strong>IDEB = ${formatarValor(ultimoCalculo.media)} × ${(ultimoCalculo.aprovacao/100).toFixed(3)} = ${formatarValor(ultimoCalculo.ideb)}</strong></p>
+                    <p style="margin-top: 8px;"><strong>🔍 Análise:</strong> 
+                        ${ultimoCalculo.ideb >= 6 ? '✅ Desempenho acima da média nacional esperada.' : 
+                          ultimoCalculo.ideb >= 4 ? '⚠️ Desempenho em desenvolvimento, há espaço para melhoria.' : 
+                          '❌ Desempenho abaixo do esperado. Recomenda-se análise das práticas pedagógicas.'}
+                    </p>
+                </div>
+            `;
+
+            document.getElementById('boletimConteudo').innerHTML = conteudo;
+            const element = document.getElementById('boletimPDF');
+            const opt = {
+                margin: [0.5, 0.5, 0.5, 0.5],
+                filename: `boletim_${escolaNome.replace(/[^a-z0-9]/gi, '_')}_${dataAtual}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, letterRendering: true },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+
+        // Eventos
+        calcularBtn.addEventListener('click', calcularTudo);
+        notaLPInput.addEventListener('input', calcularTudo);
+        notaMatInput.addEventListener('input', calcularTudo);
+        etapaSelect.addEventListener('change', atualizarTudo);
+        taxaAprovacaoInput.addEventListener('input', calcularTudo);
+        gerarPDFBtn.addEventListener('click', gerarBoletimPDF);
+
+        // Inicializar
+        atualizarTudo();
+    })();
+</script>
+</body>
+</html>
